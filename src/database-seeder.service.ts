@@ -10,7 +10,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
   constructor(
     @InjectRepository(EmailTemplate)
     private templateRepository: Repository<EmailTemplate>,
-  ) { }
+  ) {}
 
   async onApplicationBootstrap() {
     this.logger.log('Seeding database...');
@@ -41,16 +41,18 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
             <p>Two-factor authentication has been successfully enabled on your account.</p>
             <p>If you did not perform this action, please contact support immediately.</p>
           `,
-        description: 'Notification when 2FA is enabled'
-      }
+        description: 'Notification when 2FA is enabled',
+      },
     ];
 
     for (const t of defaultTemplates) {
-      const exists = await this.templateRepository.findOne({ where: { code: t.code } });
+      const exists = await this.templateRepository.findOne({
+        where: { code: t.code },
+      });
       if (!exists) {
         const newTemplate = this.templateRepository.create({
           ...t,
-          isActive: true
+          isActive: true,
         });
         await this.templateRepository.save(newTemplate);
         this.logger.log(`Template "${t.code}" seeded.`);

@@ -48,7 +48,7 @@ async function bootstrap() {
     const caCertPath = process.env.MTLS_CA_CERT_PATH;
 
     // Handle PFX or Key/Cert pair implementation
-    let httpsOptions: https.ServerOptions = {
+    const httpsOptions: https.ServerOptions = {
       requestCert: true,
       rejectUnauthorized: true,
     };
@@ -71,8 +71,11 @@ async function bootstrap() {
       https.createServer(httpsOptions, server).listen(httpsPort);
       logger.log(`mTLS HTTPS Server running on port ${httpsPort}`);
     } catch (error) {
-      logger.error(`Failed to start mTLS Server: ${error.message}`);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      logger.error(`Failed to start mTLS Server: ${errorMessage}`);
     }
   }
 }
-bootstrap();
+
+void bootstrap();

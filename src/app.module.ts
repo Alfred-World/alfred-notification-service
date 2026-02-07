@@ -30,7 +30,7 @@ import { NotificationModule } from './modules/notification/notification.module';
     TypeOrmModule.forFeature([EmailTemplate]),
     BullModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         connection: {
           host: configService.get('REDIS_HOST'),
           port: configService.get('REDIS_PORT'),
@@ -48,4 +48,4 @@ import { NotificationModule } from './modules/notification/notification.module';
   ],
   providers: [DatabaseSeederService],
 })
-export class AppModule { }
+export class AppModule {}

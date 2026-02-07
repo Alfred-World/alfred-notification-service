@@ -10,7 +10,10 @@ export class TestEmailDto {
   @IsString()
   templateCode: string;
 
-  @ApiProperty({ example: { fullName: 'John Doe', resetLink: 'https://example.com/reset' }, required: false })
+  @ApiProperty({
+    example: { fullName: 'John Doe', resetLink: 'https://example.com/reset' },
+    required: false,
+  })
   @IsObject()
   @IsOptional()
   params?: Record<string, unknown>;

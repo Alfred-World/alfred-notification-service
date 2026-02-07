@@ -7,7 +7,7 @@ import {
   Delete,
   Put,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { EmailTemplateService } from './email-template.service';
@@ -21,24 +21,28 @@ export class EmailTemplateController {
   constructor(
     private readonly templateService: EmailTemplateService,
     @InjectQueue('email') private emailQueue: Queue,
-  ) { }
+  ) {}
 
   @Post('test-send')
   @ApiOperation({ summary: 'Send a test email using a template' })
   async testSend(@Body() testDto: TestEmailDto) {
     const { to, templateCode, params } = testDto;
-    await this.emailQueue.add('send-email', {
-      to,
-      templateCode,
-      params,
-    }, {
-      attempts: 3,
-      backoff: {
-        type: 'exponential',
-        delay: 1000,
+    await this.emailQueue.add(
+      'send-email',
+      {
+        to,
+        templateCode,
+        params,
       },
-      removeOnComplete: true,
-    });
+      {
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 1000,
+        },
+        removeOnComplete: true,
+      },
+    );
     return { message: 'Test email job added to queue', to, templateCode };
   }
 

@@ -1,4 +1,9 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
@@ -15,7 +20,9 @@ export class RedisIngestorService implements OnModuleInit, OnModuleDestroy {
     private configService: ConfigService,
     @InjectQueue('email') private emailQueue: Queue,
   ) {
-    this.queueKey = this.configService.get<string>('REDIS_EMAIL_QUEUE_KEY') || 'alfred:notifications:email';
+    this.queueKey =
+      this.configService.get<string>('REDIS_EMAIL_QUEUE_KEY') ||
+      'alfred:notifications:email';
 
     const host = this.configService.get<string>('REDIS_HOST') || 'localhost';
     const port = this.configService.get<number>('REDIS_PORT') || 6379;
@@ -32,7 +39,7 @@ export class RedisIngestorService implements OnModuleInit, OnModuleDestroy {
   onModuleInit() {
     this.logger.log('Starting Redis Ingestor...');
     this.isRunning = true;
-    this.processQueue();
+    void this.processQueue();
   }
 
   onModuleDestroy() {
@@ -53,25 +60,32 @@ export class RedisIngestorService implements OnModuleInit, OnModuleDestroy {
           this.logger.log(`Received job from ${key}`);
 
           try {
-            const jobData = JSON.parse(value);
+            const jobData = JSON.parse(value) as Record<string, unknown>;
             // Add to BullMQ
             await this.emailQueue.add('send-email', jobData, {
               attempts: 3,
               backoff: {
                 type: 'exponential',
-                delay: 1000
+                delay: 1000,
               },
-              removeOnComplete: true
+              removeOnComplete: true,
             });
           } catch (jsonError) {
-            this.logger.error(`Failed to parse job data from Redis: ${value}`, jsonError);
+            const error =
+              jsonError instanceof Error
+                ? jsonError
+                : new Error(String(jsonError));
+            this.logger.error(
+              `Failed to parse job data from Redis: ${value}`,
+              error.stack,
+            );
           }
         }
       } catch (error) {
         if (this.isRunning) {
           this.logger.error('Error in Redis Ingestor loop', error);
           // specific error handling handling, await delay to prevent tight loop on error
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, 2000));
         }
       }
     }

@@ -10,7 +10,7 @@ export class EmailTemplateService {
   constructor(
     @InjectRepository(EmailTemplate)
     private templateRepository: Repository<EmailTemplate>,
-  ) { }
+  ) {}
 
   async findAll(): Promise<EmailTemplate[]> {
     return this.templateRepository.find();
@@ -29,7 +29,10 @@ export class EmailTemplateService {
     return this.templateRepository.save(newTemplate);
   }
 
-  async update(code: string, updateDto: UpdateEmailTemplateDto): Promise<EmailTemplate> {
+  async update(
+    code: string,
+    updateDto: UpdateEmailTemplateDto,
+  ): Promise<EmailTemplate> {
     const template = await this.findOne(code);
     Object.assign(template, updateDto);
     return this.templateRepository.save(template);

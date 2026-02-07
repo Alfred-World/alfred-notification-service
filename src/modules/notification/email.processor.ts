@@ -80,9 +80,12 @@ export class EmailProcessor extends WorkerHost {
       this.logger.log(`Email sent to ${to}`);
       return { sent: true };
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : '';
       this.logger.error(
-        `Failed to send email to ${to}: ${error.message}`,
-        error.stack,
+        `Failed to send email to ${to}: ${errorMessage}`,
+        errorStack,
       );
       throw error;
     }

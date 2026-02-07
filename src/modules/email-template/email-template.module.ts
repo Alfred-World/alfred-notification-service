@@ -16,4 +16,4 @@ import { BullModule } from '@nestjs/bullmq';
   providers: [EmailTemplateService],
   exports: [EmailTemplateService],
 })
-export class EmailTemplateModule { }
+export class EmailTemplateModule {}

@@ -9,21 +9,28 @@ import { map } from 'rxjs/operators';
 import { ApiResponse } from '../interfaces/api-response.interface';
 
 @Injectable()
-export class TransformInterceptor<T>
-  implements NestInterceptor<T, ApiResponse<T>> {
+export class TransformInterceptor<T> implements NestInterceptor<
+  T,
+  ApiResponse<T>
+> {
   intercept(
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<ApiResponse<T>> {
     return next.handle().pipe(
-      map((data) => {
+      map((data: unknown) => {
         // If data is already in standard format (e.g. from HealthController), return it
-        if (data && typeof data === 'object' && 'success' in data && ('result' in data || 'errors' in data)) {
-          return data;
+        if (
+          data &&
+          typeof data === 'object' &&
+          'success' in data &&
+          ('result' in data || 'errors' in data)
+        ) {
+          return data as ApiResponse<T>;
         }
         return {
           success: true,
-          result: data,
+          result: data as T,
         };
       }),
     );

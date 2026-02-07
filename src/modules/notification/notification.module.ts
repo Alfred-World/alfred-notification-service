@@ -17,4 +17,4 @@ import { EmailTemplate } from '../email-template/entities/email-template.entity'
   providers: [EmailProcessor, RedisIngestorService],
   exports: [RedisIngestorService], // If needed elsewhere
 })
-export class NotificationModule { }
+export class NotificationModule {}

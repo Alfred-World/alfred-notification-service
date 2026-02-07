@@ -16,7 +16,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
 
     const status =
       exception instanceof HttpException
@@ -24,25 +23,25 @@ export class AllExceptionsFilter implements ExceptionFilter {
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
     let errors: unknown = null;
-    let message = 'Internal server error';
-
+    // eslint-disable-next-line no-useless-assignment
+    let message: string = 'Internal server error';
 
     if (exception instanceof HttpException) {
       const exceptionResponse = exception.getResponse();
       if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
         const responseObj = exceptionResponse as Record<string, unknown>;
-        const msg = responseObj.message;
-        const err = responseObj.error;
 
-        message = (typeof msg === 'string' ? msg : exception.message);
-        errors = err || null;
+        message =
+          typeof responseObj.message === 'string'
+            ? responseObj.message
+            : exception.message;
+        errors = responseObj.error || null;
 
         // Handle ValidationPipe array of messages
-        if (Array.isArray(msg)) {
-          errors = msg;
+        if (Array.isArray(responseObj.message)) {
+          errors = responseObj.message;
           message = 'Validation Error';
         }
-
       } else {
         message = exception.message;
       }

@@ -12,7 +12,10 @@ export class UpdateEmailTemplateDto {
   @IsOptional()
   body?: string;
 
-  @ApiProperty({ example: 'Template for forgot password flow', required: false })
+  @ApiProperty({
+    example: 'Template for forgot password flow',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   description?: string;
