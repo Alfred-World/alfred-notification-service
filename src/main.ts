@@ -7,6 +7,7 @@ import { ExpressAdapter } from '@nestjs/platform-express';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import express from 'express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { apiReference } from '@scalar/nestjs-api-reference';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -21,7 +22,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Swagger Configuration
+  // OpenAPI / Scalar Configuration
   const config = new DocumentBuilder()
     .setTitle('Alfred Notification Service')
     .setDescription('The Notification Service API description')
@@ -29,7 +30,17 @@ async function bootstrap() {
     .addTag('templates')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, document);
+  SwaggerModule.setup('swagger', app, document, {
+    jsonDocumentUrl: '/swagger/swagger-json',
+  });
+
+  app.use(
+    '/docs',
+    apiReference({
+      theme: 'purple',
+      url: '/swagger/swagger-json',
+    }),
+  );
 
   // Enable validation globally
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
