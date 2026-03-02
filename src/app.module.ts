@@ -1,8 +1,10 @@
+import { join } from 'path';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmailTemplate } from './modules/email-template/entities/email-template.entity';
+import { InitialCreate1770023735126 } from './migrations/1770023735126-InitialCreate';
 import { DatabaseSeederService } from './database-seeder.service';
 import { EmailTemplateModule } from './modules/email-template/email-template.module';
 import { HealthModule } from './modules/health/health.module';
@@ -23,7 +25,9 @@ import { NotificationModule } from './modules/notification/notification.module';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
         entities: [EmailTemplate],
-        synchronize: false, // Changed to false for migration flow
+        migrations: [InitialCreate1770023735126],
+        migrationsRun: true,
+        synchronize: false,
       }),
       inject: [ConfigService],
     }),

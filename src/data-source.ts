@@ -1,6 +1,8 @@
+import { join } from 'path';
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 import { EmailTemplate } from './modules/email-template/entities/email-template.entity';
+import { InitialCreate1770023735126 } from './migrations/1770023735126-InitialCreate';
 
 config();
 
@@ -12,6 +14,6 @@ export default new DataSource({
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_DATABASE || 'alfred_notification',
   entities: [EmailTemplate],
-  migrations: ['src/migrations/*.ts'],
+  migrations: [InitialCreate1770023735126],
   synchronize: false,
 });
