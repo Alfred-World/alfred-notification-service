@@ -53,7 +53,7 @@ async function bootstrap() {
 
   const mtlsEnabled = process.env.MTLS_ENABLED === 'true';
   if (mtlsEnabled) {
-    const httpsPort = process.env.MTLS_PORT || 8301;
+    const httpsPort = process.env.MTLS_HTTPS_PORT || 8301;
     const serverCertPath = process.env.MTLS_SERVER_CERT_PATH;
     const serverKeyPath = process.env.MTLS_SERVER_KEY_PATH; // If using separated key/cert
     const caCertPath = process.env.MTLS_CA_CERT_PATH;
