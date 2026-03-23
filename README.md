@@ -1,98 +1,356 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Alfred Notification Service
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS service for email notification delivery in the Alfred monorepo.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This service is responsible for:
+- storing email templates in PostgreSQL
+- processing email jobs through Redis/BullMQ
+- sending emails through SMTP
+- exposing health endpoints for deployment checks
 
-## Description
+## Tech Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- NestJS 11
+- TypeORM 0.3.x
+- PostgreSQL
+- Redis / BullMQ
+- Nodemailer
+- pnpm
 
-## Project setup
+## Project Structure
 
-```bash
-$ pnpm install
+```text
+alfred-notification-service/
+├── scripts/                 # utility scripts such as db creation
+├── src/
+│   ├── common/              # shared utilities
+│   ├── migrations/          # TypeORM migrations
+│   ├── modules/             # feature modules
+│   ├── app.module.ts        # Nest root module
+│   └── data-source.ts       # TypeORM CLI datasource
+├── test/                    # e2e tests
+├── .env.example             # local environment template
+├── Makefile                 # common dev commands
+└── package.json             # scripts and dependencies
 ```
 
-## Compile and run the project
+## Requirements
+
+Before running locally, ensure these are available:
+
+- Node.js 20+
+- pnpm
+- PostgreSQL
+- Redis
+
+Optional for container workflow:
+
+- Docker
+
+## Environment Configuration
+
+Create a local env file:
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+cp .env.example .env
 ```
 
-## Run tests
+Minimum required variables:
+
+```env
+SMTP_HOST=smtp-relay.brevo.com
+SMTP_PORT=587
+SMTP_USERNAME=<CHANGE_ME>
+SMTP_PASSWORD=<CHANGE_ME>
+SMTP_FROM_EMAIL=noreply@yourdomain.com
+SMTP_FROM_NAME="Alfred Notification"
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=<CHANGE_ME>
+DB_DATABASE=alfred_notification
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=<CHANGE_ME>
+```
+
+Important notes:
+
+- `DB_DATABASE` must point to a PostgreSQL database that this service can access.
+- `migration:generate` requires the database to be reachable.
+- `REDIS_PASSWORD` must match the Redis instance configuration.
+- `CORS_ALLOWED_ORIGINS` is optional for local development.
+- `MTLS_*` variables are only needed in environments that use mTLS.
+
+## Install Dependencies
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+make install
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Or directly:
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+pnpm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Run In Development
 
-## Resources
+Start the service in watch mode:
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+make dev
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Or directly:
 
-## Support
+```bash
+pnpm dev
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Default local port from `.env.example`:
 
-## Stay in touch
+```text
+http://localhost:8300
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Build And Run Production Locally
 
-## License
+Build:
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+make build
+```
+
+Start compiled app:
+
+```bash
+make start
+```
+
+Or directly:
+
+```bash
+pnpm build
+pnpm start:prod
+```
+
+## Database Workflow
+
+### Create Database
+
+If the target database does not exist yet:
+
+```bash
+pnpm run db:create
+```
+
+### Run Migrations
+
+Apply pending migrations:
+
+```bash
+make migration-run
+```
+
+Or directly:
+
+```bash
+pnpm run migration:run
+```
+
+### Revert Last Migration
+
+```bash
+make migration-revert
+```
+
+Or directly:
+
+```bash
+pnpm run migration:revert
+```
+
+### Create Empty Migration
+
+Use this when you want to write SQL manually:
+
+```bash
+pnpm run migration:create src/migrations/YourMigrationName
+```
+
+Example:
+
+```bash
+pnpm run migration:create src/migrations/EnsureGenerateUuidV7Function
+```
+
+### Generate Migration From Entity Changes
+
+Use this after modifying entity definitions.
+
+```bash
+pnpm run migration:generate src/migrations/YourMigrationName
+```
+
+Example:
+
+```bash
+pnpm run migration:generate src/migrations/AddEmailTemplateIndexes
+```
+
+Important:
+
+- this command compares entity metadata with the current database schema
+- PostgreSQL must be running and reachable
+- if the database connection fails, no migration file will be created
+
+### Migration Discovery
+
+The service is configured to auto-discover:
+
+- entities via `src/modules/**/*.entity{.ts,.js}`
+- migrations via `src/migrations/*{.ts,.js}`
+
+That means you do not need to import every migration file manually into:
+
+- `src/app.module.ts`
+- `src/data-source.ts`
+
+## Testing
+
+Run unit tests:
+
+```bash
+make test
+```
+
+Watch mode:
+
+```bash
+make test-watch
+```
+
+Coverage:
+
+```bash
+make test-cov
+```
+
+E2E tests:
+
+```bash
+make test-e2e
+```
+
+## Code Quality
+
+Lint:
+
+```bash
+make lint
+```
+
+Format:
+
+```bash
+make format
+```
+
+## Docker
+
+Build image:
+
+```bash
+make docker-build
+```
+
+Build without cache:
+
+```bash
+make docker-build-nc
+```
+
+Clean unused images:
+
+```bash
+make docker-clean
+```
+
+## Production Deployment
+
+Prepare image for infra deployment:
+
+```bash
+make prod-deploy
+```
+
+Then deploy from the infra workspace:
+
+```bash
+cd ../alfred-infra
+make prod-deploy
+```
+
+## Common Issues
+
+### `migration:generate` does not create a file
+
+Check these first:
+
+- PostgreSQL is running
+- `.env` values are correct
+- `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE` are valid
+- you are using the correct command:
+
+```bash
+pnpm run migration:generate src/migrations/YourMigrationName
+```
+
+Do not use this form for the current script setup:
+
+```bash
+pnpm run migration:generate -- src/migrations/YourMigrationName
+```
+
+### Database connection refused
+
+Typical cause:
+
+```text
+ECONNREFUSED 127.0.0.1:5432
+```
+
+Meaning:
+
+- PostgreSQL is not running
+- wrong port
+- wrong host
+- wrong local `.env`
+
+### Redis connection issues
+
+Check:
+
+- Redis is running
+- `REDIS_HOST` and `REDIS_PORT` are correct
+- password matches the actual instance
+
+## Recommended Local Workflow
+
+```bash
+cp .env.example .env
+pnpm install
+pnpm run db:create
+pnpm run migration:run
+pnpm dev
+```
+
+When changing schema:
+
+```bash
+pnpm run migration:generate src/migrations/YourMigrationName
+pnpm run migration:run
+```

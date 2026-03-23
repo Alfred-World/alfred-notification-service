@@ -4,7 +4,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmailTemplate } from './modules/email-template/entities/email-template.entity';
-import { InitialCreate1770023735126 } from './migrations/1770023735126-InitialCreate';
 import { DatabaseSeederService } from './database-seeder.service';
 import { EmailTemplateModule } from './modules/email-template/email-template.module';
 import { HealthModule } from './modules/health/health.module';
@@ -24,8 +23,8 @@ import { NotificationModule } from './modules/notification/notification.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        entities: [EmailTemplate],
-        migrations: [InitialCreate1770023735126],
+        autoLoadEntities: true,
+        migrations: [join(__dirname, 'migrations/*{.ts,.js}')],
         migrationsRun: true,
         synchronize: false,
       }),
