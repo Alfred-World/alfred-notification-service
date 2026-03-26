@@ -3,8 +3,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { EmailTemplate } from './modules/email-template/entities/email-template.entity';
-import { DatabaseSeederService } from './database-seeder.service';
 import { EmailTemplateModule } from './modules/email-template/email-template.module';
 import { HealthModule } from './modules/health/health.module';
 import { NotificationModule } from './modules/notification/notification.module';
@@ -30,7 +28,6 @@ import { NotificationModule } from './modules/notification/notification.module';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([EmailTemplate]),
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -49,6 +46,5 @@ import { NotificationModule } from './modules/notification/notification.module';
     HealthModule,
     NotificationModule,
   ],
-  providers: [DatabaseSeederService],
 })
 export class AppModule {}

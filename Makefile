@@ -5,6 +5,7 @@ DOCKER_TAG = latest
 
 .PHONY: help install dev build start test test-e2e lint format \
         migration-generate migration-run migration-revert \
+        seed seed-force seed-revert \
         docker-build docker-build-nc docker-clean prod-deploy
 
 help:
@@ -24,6 +25,11 @@ help:
 	@echo "  make migration-generate NAME=<name>  Generate migration"
 	@echo "  make migration-run                   Run all pending migrations"
 	@echo "  make migration-revert                Revert last migration"
+	@echo ""
+	@echo "🌱 Seeding:"
+	@echo "  make seed                            Run pending seeds"
+	@echo "  make seed-force                      Force re-run all seeds"
+	@echo "  make seed-revert                     Revert all seeds (calls down())"
 	@echo ""
 	@echo "🧪 Testing:"
 	@echo "  make test                 Run unit tests"
@@ -83,6 +89,26 @@ migration-run:
 migration-revert:
 	@echo "⏪ Reverting last migration..."
 	pnpm run migration:revert
+	@echo "✅ Migration reverted!"
+
+# ============================================
+# Database Seeding
+# ============================================
+
+seed:
+	@echo "🌱 Running pending seeds..."
+	pnpm run seed
+	@echo "✅ Seed complete!"
+
+seed-force:
+	@echo "🌱 Force running all seeds..."
+	pnpm run seed:force
+	@echo "✅ Force seed complete!"
+
+seed-revert:
+	@echo "⏪ Reverting seeds..."
+	pnpm run seed:revert
+	@echo "✅ Seed revert complete!"
 	@echo "✅ Migration reverted!"
 
 # ============================================
